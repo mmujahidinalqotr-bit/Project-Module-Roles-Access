@@ -1758,24 +1758,31 @@ document.getElementById('pw-eye').addEventListener('click', function() {
 var saveTimer = null;
 var saveIndicatorTimer = null;
 
-function saveRoles() {
+async function saveRoles() {
+  if(!window.db) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      roles: roles,
-      savedAt: new Date().toISOString()
-    }));
+    showSaveIndicator();
+    await window.setDoc(window.doc(window.db, "system_data", STORAGE_KEY), { roles: roles });
+  } catch(e) {
+    console.error('Save failed', e);
+  }
+}));
     showSaveIndicator();
   } catch(e) { console.warn('Save failed', e); }
 }
 
-function loadRoles() {
+async function loadRoles() {
+  if(!window.db) return;
   try {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
-    var data = JSON.parse(raw);
-    if(data && Array.isArray(data.roles)) {
-      roles = data.roles;
+    const docSnap = await window.getDoc(window.doc(window.db, "system_data", STORAGE_KEY));
+    if(docSnap.exists()) {
+      var data = docSnap.data();
+      if(data && Array.isArray(data.roles)) {
+        roles = data.roles;
+      }
     }
+  } catch(e) { console.error('Load failed', e); roles = []; }
+}
   } catch(e) { console.warn('Load failed', e); roles = []; }
 }
 
@@ -1880,9 +1887,14 @@ document.getElementById('help-btn').addEventListener('click', function() {
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────
-loadRoles();
-renderRoleList();
-renderEditorPanel();
+window.addEventListener("FirebaseReady", async function() {
+  var area = document.getElementById("editor-panel");
+  if(area) area.innerHTML = "<div style='padding:4rem;text-align:center;color:var(--navy);font-weight:bold;font-size:1.1rem'>جارٍ الاتصال بقاعدة البيانات السحابية (Firebase)... ⏳</div>";
+  await loadRoles();
+  if(roles.length === 0) addNewRole();
+  renderRoleList();
+  renderEditorPanel();
+});
 if(isAuthenticated()){
   document.getElementById('login-screen').classList.add('hidden');
 } else {
