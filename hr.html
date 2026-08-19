@@ -1761,14 +1761,11 @@ var saveIndicatorTimer = null;
 async function saveRoles() {
   if(!window.db) return;
   try {
-    showSaveIndicator();
     await window.setDoc(window.doc(window.db, "system_data", STORAGE_KEY), { roles: roles });
+    showSaveIndicator();
   } catch(e) {
     console.error('Save failed', e);
   }
-}));
-    showSaveIndicator();
-  } catch(e) { console.warn('Save failed', e); }
 }
 
 async function loadRoles() {
@@ -1782,8 +1779,6 @@ async function loadRoles() {
       }
     }
   } catch(e) { console.error('Load failed', e); roles = []; }
-}
-  } catch(e) { console.warn('Load failed', e); roles = []; }
 }
 
 function scheduleSave() {
