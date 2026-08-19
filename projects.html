@@ -1150,12 +1150,13 @@ document.getElementById('help-btn').addEventListener('click', function() {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.addEventListener("FirebaseReady", async function() {
-  var area = document.getElementById("editor-panel");
-  if(area) area.innerHTML = "<div style='padding:4rem;text-align:center;color:var(--navy);font-weight:bold;font-size:1.1rem'>جارٍ الاتصال بقاعدة البيانات السحابية (Firebase)... ⏳</div>";
   await loadRoles();
-  if(roles.length === 0) addNewRole();
-  renderRoleList();
-  renderEditorPanel();
+  if (roles.length > 0) {
+    selectRole(roles[0].id);
+  } else {
+    renderRoleList();
+    renderEditorPanel();
+  }
 });
 if(isAuthenticated()){
   document.getElementById('login-screen').classList.add('hidden');
